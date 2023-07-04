@@ -38,6 +38,9 @@ view lens s = getConst (lens Const s)
 (^.) :: s -> Lens s a -> a
 s ^. lens = view lens s
 
+(%~) :: Lens s a -> (a -> a) -> s -> s
+(%~) = over
+
 aliceInt :: Person Int
 aliceInt = Person "Alice" 30
 
@@ -50,7 +53,7 @@ setAge age person = person {personAge = age}
 aliceDouble :: Person Double
 aliceDouble = setAge 30.5 aliceInt
 
-alice = Person {personName = "name", personAge = 18}
+alice = Person {personName = "Alice2", personAge = 18}
 
 main :: IO ()
 main = do
@@ -58,5 +61,6 @@ main = do
   putStrLn ("out: " ++ show (  aliceInt ^. personAgeL    ))
   putStrLn ("out: " ++ show (  alice ^. personAgeL    ))
   putStrLn ("out: " ++ show (  view personAgeL alice   ))
-  putStrLn ("out: " ++ show (setAge 30.5 alice))
+  putStrLn ("out: " ++ show aliceDouble)  -- should fail in tutorial
+  putStrLn ("out: " ++ show (setAge 30.5 alice)) -- should fail in tutorial
 
