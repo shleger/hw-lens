@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 -- https://www.fpcomplete.com/haskell/tutorial/lens/
 module Polymorphic where
@@ -8,17 +8,35 @@ module Polymorphic where
 import Data.Text (Text)
 import qualified Data.Text as T
 
-type Lens s a = forall f. Functor f => (a -> f a) -> (s -> f s)
+type Lens s a =  forall f. Functor f => (a -> f a) -> (s -> f s)
+-- type Lens s t a b = forall f. Functor f => (a -> f b) -> (s -> f t)
+
+-- -- Our old monomorphic variant
+-- type Lens' s a = Lens s s a a
+
+
 
 -- ============================
 
 data Person age = Person
   { personName :: !Text,
     personAge :: !age
-  }
+  } deriving Show
 
 lens :: (s -> a) -> (s -> a -> s) -> Lens s a
-lens getter setter f s = setter s <$> f (getter s)  
+lens getter setter f s = setter s <$> f (getter s)
+
+newtype Identity a = Identity { runIdentity :: a } deriving Functor
+newtype Const a b = Const { getConst :: a } deriving Functor
+
+over :: Lens s a -> (a -> a) -> s -> s
+over lens f s = runIdentity (lens (Identity . f) s)
+
+view :: Lens s a -> s -> a
+view lens s = getConst (lens Const s)
+
+(^.) :: s -> Lens s a -> a
+s ^. lens = view lens s
 
 aliceInt :: Person Int
 aliceInt = Person "Alice" 30
@@ -32,14 +50,12 @@ setAge age person = person {personAge = age}
 aliceDouble :: Person Double
 aliceDouble = setAge 30.5 aliceInt
 
--- alice = Person {personName = "name", personAge = 18}
+alice = Person {personName = "name", personAge = 18}
 
 main :: IO ()
 main = do
 
+  putStrLn ("out: " ++ show (  view personAgeL aliceInt   ))
+  putStrLn ("out: " ++ show (  view personAgeL alice   ))
+  putStrLn ("out: " ++ show (setAge 30.5 alice))
 
-  -- putStrLn ("out: " ++ show (setPersonAddress  Address{addressCity="Voronezh", addressStreet="New Street"} alice ))
-  -- putStrLn ("out: " ++ show (  view   personCityL alice   ))
-  -- putStrLn ("out: " ++ show (  reverseCity alice   ))
-  -- putStrLn ("out: " ++ show (  setCity "Voronezh" alice   ))
-  print "ddd"
