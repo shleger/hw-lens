@@ -131,8 +131,8 @@ over lens f s = runIdentity (lens (Identity . f) s)
 view :: Lens s a -> s -> a
 view lens s = getConst (lens Const s)
 
-personAddressL :: Lens Person Address
-personAddressL f person = (\address -> person { personAddress = address }) <$> f (personAddress person) 
+-- personAddressL :: Lens Person Address
+-- personAddressL f person = (\address -> person { personAddress = address }) <$> f (personAddress person)
 
 getPersonAddress :: Person -> Address
 getPersonAddress = view personAddressL
@@ -143,10 +143,28 @@ modifyPersonAddress = over personAddressL
 setPersonAddress :: Address -> Person -> Person
 setPersonAddress address = modifyPersonAddress (const address)
 
--- ============================
+-- ============================ Composing lenses
+
+lens :: (s -> a) -> (s -> a -> s) -> Lens s a
+lens getter setter f s = setter s <$> f (getter s)
+
+personAddressL :: Lens Person Address
+personAddressL = lens personAddress (\x y -> x { personAddress = y })
+
+addressCityL :: Lens Address Text
+addressCityL = lens addressCity (\x y -> x { addressCity = y })
+
+personCityL :: Lens Person Text
+personCityL = personAddressL . addressCityL
+
+(^.) :: s -> Lens s a -> a
+s ^. lens = view lens s
+
+-- ============================    
 
 main :: IO ()
 main = do
   let alice = Person {personName = "name", personAddress = Address {addressCity = "Moscow", addressStreet = "Arbat"}}
 
   putStrLn ("out: " ++ show (setPersonAddress  Address{addressCity="Voronezh", addressStreet="New Street"} alice ))
+  putStrLn ("out: " ++ show (  alice ^. personCityL  ))
