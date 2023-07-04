@@ -55,7 +55,8 @@ alice = Person {personName = "name", personAge = 18}
 main :: IO ()
 main = do
 
-  putStrLn ("out: " ++ show (  view personAgeL aliceInt   ))
+  putStrLn ("out: " ++ show (  aliceInt ^. personAgeL    ))
+  putStrLn ("out: " ++ show (  alice ^. personAgeL    ))
   putStrLn ("out: " ++ show (  view personAgeL alice   ))
   putStrLn ("out: " ++ show (setAge 30.5 alice))
 
