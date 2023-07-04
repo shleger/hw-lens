@@ -157,8 +157,8 @@ addressCityL = lens addressCity (\x y -> x { addressCity = y })
 personCityL :: Lens Person Text
 personCityL = personAddressL . addressCityL
 
-(^.) :: s -> Lens s a -> a
-s ^. lens = view lens s
+-- (^.) :: s -> Lens s a -> a
+-- s ^. lens = view lens s
 
 -- ============================    
 
@@ -167,4 +167,4 @@ main = do
   let alice = Person {personName = "name", personAddress = Address {addressCity = "Moscow", addressStreet = "Arbat"}}
 
   putStrLn ("out: " ++ show (setPersonAddress  Address{addressCity="Voronezh", addressStreet="New Street"} alice ))
-  putStrLn ("out: " ++ show (  alice ^. personCityL  ))
+  putStrLn ("out: " ++ show (  view   personCityL alice  ))
