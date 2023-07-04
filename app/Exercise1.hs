@@ -42,16 +42,17 @@ wilshire = "Wilshire Blvd"
 -- -- FIXME set Alice's street to Wilshire
 aliceWilshire :: Person
 aliceWilshire  = setStreet alice
+-- aliceWilshire  = set  (address . street )  wilshire  alice
 
 setStreet :: Person -> Person
-setStreet = set (address . street )  wilshire
+setStreet = set  (address . street )  wilshire 
 
 getStreet :: Person -> Text
 getStreet = view $ address . street
 
 -- | Increase age by 1
 birthday :: Person -> Person
-birthday = over age (+1)
+birthday = over age (+1)  -- the same as: birthday person = over age (+1) person
 
 getAge :: Person -> Int
 getAge = view age
