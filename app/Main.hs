@@ -7,6 +7,7 @@
 module Main where
 
 import Data.Text (Text)
+import qualified Data.Text as T
 
 data Address = Address
   { addressCity :: !Text,
@@ -157,14 +158,37 @@ addressCityL = lens addressCity (\x y -> x { addressCity = y })
 personCityL :: Lens Person Text
 personCityL = personAddressL . addressCityL
 
--- (^.) :: s -> Lens s a -> a
--- s ^. lens = view lens s
+(^.) :: s -> Lens s a -> a
+s ^. lens = view lens s
 
--- ============================    
+infixl 8 ^.
+
+(%~) :: Lens s a -> (a -> a) -> s -> s
+(%~) = over
+
+infixr 4 %~
+
+set :: Lens s a -> a -> s -> s
+set lens a s = runIdentity $ lens (\_olda -> Identity a) s
+
+reverseCity :: Person -> Person
+reverseCity = personAddressL.addressCityL %~ T.reverse
+
+getCity :: Person -> Text
+getCity person = person ^. personAddressL.addressCityL
+
+
+
+setCity :: Text -> Person -> Person
+setCity = set (personAddressL.addressCityL)
+
+-- ============================
 
 main :: IO ()
 main = do
   let alice = Person {personName = "name", personAddress = Address {addressCity = "Moscow", addressStreet = "Arbat"}}
 
   putStrLn ("out: " ++ show (setPersonAddress  Address{addressCity="Voronezh", addressStreet="New Street"} alice ))
-  putStrLn ("out: " ++ show (  view   personCityL alice  ))
+  putStrLn ("out: " ++ show (  view   personCityL alice   ))
+  putStrLn ("out: " ++ show (  reverseCity alice   ))
+  putStrLn ("out: " ++ show (  setCity "Voronezh" alice   ))
